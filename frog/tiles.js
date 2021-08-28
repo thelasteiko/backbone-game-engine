@@ -8,7 +8,7 @@
    * https://github.com/martindrapeau/backbone-game-engine
    *
    */
-  
+
   Backbone.Tile = Backbone.Sprite.extend({
     defaults: {
       type: "tile",
@@ -43,9 +43,11 @@
     return Backbone[newCls];
   }
 
-  extendSprite("Tile", "land1", {collision: true}, {idle: {sequences: [353]}});
+  extendSprite("Tile", "land1", {collision: true},
+   {idle: {sequences: [353]}});
 
-  extendSprite("Tile", "land2", {collision: true}, {idle: {sequences: [354]}});
+  extendSprite("Tile", "land2", {collision: true},
+   {idle: {sequences: [354]}});
 
   extendSprite("Tile", "land3", {collision: true}, {idle: {sequences: [355]}});
 

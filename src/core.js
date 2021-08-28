@@ -126,7 +126,7 @@
     draw: function(context, options) {
       options || (options = {});
       if (this.get("visible") === false) return this;
-      
+
       var animation = this.getAnimation(),
           sequenceIndex = this.get("sequenceIndex") || 0;
       if (!animation || animation.sequences.length == 0) return;
@@ -139,29 +139,49 @@
           scaleY = animation.scaleY && animation.scaleY != 1 ? animation.scaleY : null,
           x = Math.round(this.get("x") + (options.offsetX || 0) + (sequence.x || 0)),
           y = Math.round(this.get("y") + (options.offsetY || 0) + (sequence.y || 0)),
-          opacity = this.get("opacity");
+          opacity = this.get("opacity"),
+          rotate = this.get("angle");
       if (sequence.scaleY && sequence.scaleX != 1) scaleX = sequence.scaleX;
       if (sequence.scaleY &&  sequence.scaleY != 1) scaleY = sequence.scaleY;
 
-      if (_.isNumber(scaleX) || _.isNumber(scaleY) || _.isNumber(opacity)) context.save();
+      if (_.isNumber(scaleX) || _.isNumber(scaleY) ||
+          _.isNumber(opacity) || (_.isNumber(rotate) && rotate !== 0)) context.save();
 
       if (_.isNumber(scaleX) || _.isNumber(scaleY)) {
         var flipX = scaleX && scaleX != 1 ? x + frame.width / 2 : 0;
         var flipY = scaleY && scaleY != 1 ? y + frame.height / 2 : 0;
+        // TODO there is almost certainly a better way to do this
         context.translate(flipX, flipY);
         context.scale(scaleX || 1, scaleY || 1);
         context.translate(-flipX, -flipY);
       }
       if (_.isNumber(opacity)) context.globalAlpha = opacity;
+      //console.log("Sequence: " + frameIndex);
+      //console.log(frame);
+      if (this.spriteSheet.img){
+        if ((_.isNumber(rotate) && rotate !== 0)) {
+          let wh = this.get("width") / 2,
+           hh = this.get("height") / 2;
+          // move canvas to x, y, rotate around that point
+          context.translate(x, y);
+          context.rotate(rotate * Math.PI / 180);
+          context.drawImage(
+            this.spriteSheet.img,
+            frame.x, frame.y, frame.width, frame.height,
+            -wh+1, -hh+1, frame.width, frame.height
+          );
+        } else {
+          context.drawImage(
+            this.spriteSheet.img,
+            frame.x, frame.y, frame.width, frame.height,
+            x, y, frame.width, frame.height
+          );
+        }
+      }
 
-      if (this.spriteSheet.img)
-        context.drawImage(
-          this.spriteSheet.img,
-          frame.x, frame.y, frame.width, frame.height,
-          x, y, frame.width, frame.height
-        );
 
-      if (_.isNumber(scaleX) || _.isNumber(scaleY) || _.isNumber(opacity)) context.restore();
+      if (_.isNumber(scaleX) || _.isNumber(scaleY) ||
+          _.isNumber(opacity) || (_.isNumber(rotate) && rotate !== 0)) context.restore();
 
       if (typeof this.onDraw == "function") this.onDraw(context, options);
       return this;
@@ -230,8 +250,10 @@
     // when drawing on the canvas.
     buildFrames: function() {
       var sheet = this.toJSON();
+
       for (var row = 0; row < sheet.tileRows; row++) {
         for (var col = 0; col < sheet.tileColumns; col++)
+          //console.log(`{x:${sheet}}`)
           this.frames.push({
             x: sheet.x + col * (sheet.tileWidth + sheet.tilePadding),
             y: sheet.y + row * (sheet.tileHeight + sheet.tilePadding),
@@ -281,7 +303,7 @@
   });
 
   // SpriteSheetCollection class; a Backbone collection of SpriteSheet models.
-  // 
+  //
   // Once the sprite sheet collection is instantiated, call method
   // attachToSpriteClasses() to automatically attach sprite sheets to sprites.
   // Will set the spriteSheet property on classes, avoiding you to have to do
@@ -303,12 +325,23 @@
     // calling draw on any sprite.
     attachToSpriteClasses: function() {
       var spriteSheets = this;
+      //console.log('finding sprites: ' + spriteSheets.length);
+      //console.log(spriteSheets)
+
       _.each(Backbone, function(cls) {
+        //console.log('Class is sprite: ' + (cls.prototype) + ' :: ' + (cls.prototype instanceof Backbone.Sprite))
         if (_.isFunction(cls) && cls.prototype instanceof Backbone.Sprite &&
             cls.prototype.defaults && cls.prototype.defaults.spriteSheet &&
-            (!cls.prototype.spriteSheet || cls.prototype.spriteSheet.attributes.name != cls.prototype.defaults.spriteSheet)) {
+            (!cls.prototype.spriteSheet ||
+              cls.prototype.spriteSheet.attributes.name != cls.prototype.defaults.spriteSheet)) {
+          //console.log('found class: ' + cls.prototype);
+          //console.log('spritesheet: ' + cls.prototype.defaults.spriteSheet);
           var spriteSheet = spriteSheets.get(cls.prototype.defaults.spriteSheet);
-          if (spriteSheet) cls.prototype.spriteSheet = spriteSheet;
+          //console.log(spriteSheet)
+          if (spriteSheet) {
+            cls.prototype.spriteSheet = spriteSheet;
+            //console.log(cls.prototype);
+          }
         }
       });
       return this;
@@ -371,9 +404,11 @@
         });
       });
       this.sprites.on("add", function(sprite) {
-        sprite.engine = engine;
-        sprite._draw = false;
-        sprite.trigger("attach", engine);
+        if (typeof sprite.engine === 'undefined') {
+          sprite.engine = engine;
+          sprite._draw = false;
+          sprite.trigger("attach", engine);
+        }
       });
       this.sprites.on("remove", function(sprite) {
         sprite.trigger("detach", engine);
@@ -1280,15 +1315,15 @@
     easeOutQuad: function (t) { return t*(2-t) },
     // acceleration until halfway, then deceleration
     easeInOutQuad: function (t) { return t<.5 ? 2*t*t : -1+(4-2*t)*t },
-    // accelerating from zero velocity 
+    // accelerating from zero velocity
     easeInCubic: function (t) { return t*t*t },
-    // decelerating to zero velocity 
+    // decelerating to zero velocity
     easeOutCubic: function (t) { return (--t)*t*t+1 },
-    // acceleration until halfway, then deceleration 
+    // acceleration until halfway, then deceleration
     easeInOutCubic: function (t) { return t<.5 ? 4*t*t*t : (t-1)*(2*t-2)*(2*t-2)+1 },
-    // accelerating from zero velocity 
+    // accelerating from zero velocity
     easeInQuart: function (t) { return t*t*t*t },
-    // decelerating to zero velocity 
+    // decelerating to zero velocity
     easeOutQuart: function (t) { return 1-(--t)*t*t*t },
     // acceleration until halfway, then deceleration
     easeInOutQuart: function (t) { return t<.5 ? 8*t*t*t*t : 1-8*(--t)*t*t*t },
@@ -1296,7 +1331,7 @@
     easeInQuint: function (t) { return t*t*t*t*t },
     // decelerating to zero velocity
     easeOutQuint: function (t) { return 1+(--t)*t*t*t*t },
-    // acceleration until halfway, then deceleration 
+    // acceleration until halfway, then deceleration
     easeInOutQuint: function (t) { return t<.5 ? 16*t*t*t*t*t : 1+16*(--t)*t*t*t*t }
   };
 

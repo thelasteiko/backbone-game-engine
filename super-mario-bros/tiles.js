@@ -8,7 +8,7 @@
    * https://github.com/martindrapeau/backbone-game-engine
    *
    */
-  
+
   Backbone.Tile = Backbone.Sprite.extend({
     defaults: {
       type: "tile",
@@ -52,15 +52,15 @@
   extendSprite("Tile", "block2", {collision: true}, {idle: {sequences: [29]}});
 
   extendSprite("Tile", "tube1", {collision: true}, {idle: {sequences: [290]}});
-  
+
   extendSprite("Tile", "tube2", {collision: true}, {idle: {sequences: [291]}});
 
   extendSprite("Tile", "tube1-mirror", {collision: true}, {idle: {sequences: [261]}});
-  
+
   extendSprite("Tile", "tube2-mirror", {collision: true}, {idle: {sequences: [262]}});
 
   extendSprite("Tile", "tube1-ug", {collision: true}, {idle: {sequences: [406]}});
-  
+
   extendSprite("Tile", "tube2-ug", {collision: true}, {idle: {sequences: [407]}});
 
   extendSprite("Tile", "bush1", {collision: false}, {idle: {sequences: [240]}});
@@ -94,15 +94,15 @@
   extendSprite("Tile", "block2-ug", {collision: true}, {idle: {sequences: [145]}});
 
   extendSprite("Tile", "tube3", {collision: true}, {idle: {sequences: [319]}});
-  
+
   extendSprite("Tile", "tube4", {collision: true}, {idle: {sequences: [320]}});
 
   extendSprite("Tile", "tube3-mirror", {collision: true}, {idle: {sequences: [232]}});
-  
+
   extendSprite("Tile", "tube4-mirror", {collision: true}, {idle: {sequences: [233]}});
 
   extendSprite("Tile", "tube3-ug", {collision: true}, {idle: {sequences: [435]}});
-  
+
   extendSprite("Tile", "tube4-ug", {collision: true}, {idle: {sequences: [436]}});
 
   extendSprite("Tile", "bush4", {collision: false}, {idle: {sequences: [269]}});
@@ -126,21 +126,21 @@
   extendSprite("Tile", "flag-pole2", {collision: false}, {idle: {sequences: [335]}});
 
   extendSprite("Tile", "tube1-out", {collision: true}, {idle: {sequences: [292]}});
-  
+
   extendSprite("Tile", "tube2-out", {collision: true}, {idle: {sequences: [293]}});
-  
+
   extendSprite("Tile", "tube3-out", {collision: true}, {idle: {sequences: [294]}});
 
   extendSprite("Tile", "tube1-out-mirror", {collision: true}, {idle: {sequences: [234]}});
-  
+
   extendSprite("Tile", "tube2-out-mirror", {collision: true}, {idle: {sequences: [235]}});
-  
+
   extendSprite("Tile", "tube3-out-mirror", {collision: true}, {idle: {sequences: [236]}});
 
   extendSprite("Tile", "tube1-out-ug", {collision: true}, {idle: {sequences: [408]}});
-  
+
   extendSprite("Tile", "tube2-out-ug", {collision: true}, {idle: {sequences: [409]}});
-  
+
   extendSprite("Tile", "tube3-out-ug", {collision: true}, {idle: {sequences: [410]}});
 
   extendSprite("Tile", "brick7-castle", {collision: true}, {idle: {sequences: [42]}});
@@ -164,21 +164,21 @@
   extendSprite("Tile", "lava-bridge", {collision: true}, {idle: {sequences: [148]}});
 
   extendSprite("Tile", "tube4-out", {collision: true}, {idle: {sequences: [321]}});
-  
+
   extendSprite("Tile", "tube5-out", {collision: true}, {idle: {sequences: [322]}});
-  
+
   extendSprite("Tile", "tube6-out", {collision: true}, {idle: {sequences: [323]}});
 
   extendSprite("Tile", "tube4-out-mirror", {collision: true}, {idle: {sequences: [263]}});
-  
+
   extendSprite("Tile", "tube5-out-mirror", {collision: true}, {idle: {sequences: [264]}});
-  
+
   extendSprite("Tile", "tube6-out-mirror", {collision: true}, {idle: {sequences: [265]}});
 
   extendSprite("Tile", "tube4-out-ug", {collision: true}, {idle: {sequences: [437]}});
-  
+
   extendSprite("Tile", "tube5-out-ug", {collision: true}, {idle: {sequences: [438]}});
-  
+
   extendSprite("Tile", "tube6-out-ug", {collision: true}, {idle: {sequences: [439]}});
 
   extendSprite("Tile", "brick-castle", {collision: true}, {idle: {sequences: [11]}});
@@ -196,11 +196,11 @@
   extendSprite("Tile", "railing", {collision: false}, {idle: {sequences: [363]}});
 
   extendSprite("Tile", "platform1", {collision: true}, {idle: {sequences: [237]}});
-  
+
   extendSprite("Tile", "platform2", {collision: true}, {idle: {sequences: [238]}});
-  
+
   extendSprite("Tile", "platform3", {collision: true}, {idle: {sequences: [239]}});
-  
+
   extendSprite("Tile", "platform-pole", {collision: false}, {idle: {sequences: [208]}});
 
 
@@ -234,7 +234,8 @@
       var animation = this.getAnimation(),
           sequenceIndex = this.get("sequenceIndex") || 0;
       if (!animation) return;
-      this.set("sequenceIndex", sequenceIndex < animation.sequences.length-1 ? sequenceIndex + 1 : 0);
+      this.set("sequenceIndex",
+        sequenceIndex < animation.sequences.length-1 ? sequenceIndex + 1 : 0);
     }
   });
 

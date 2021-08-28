@@ -36,7 +36,7 @@
       this.input = options.input;
       this.camera = options.camera;
       this.debugPanel = options.debugPanel;
-      
+
       _.bindAll(this,
         "wrapTime",
         "save", "getWorldIndex", "getWorldCol", "getWorldRow", "cloneAtPosition",
@@ -53,6 +53,7 @@
       this.wrapTime("drawStaticSprites");
 
       this.sprites = new Backbone.Collection();
+      this.zMap = [];
       this.quadTree = QuadTree(0, 0, this.width(), this.height());
       this.setupSpriteLayers();
       this.spawnSprites();
@@ -103,8 +104,10 @@
       this.on("change:viewportLeft change:viewportRight change:viewportTop change:viewportBottom", this.updateViewport);
       this.updateViewport();
       this.sprites.each(function(sprite) {
-        sprite.engine = engine;
-        sprite.trigger("attach", engine);
+        if (typeof sprite.engine === 'undefined') {
+          sprite.engine = engine;
+          sprite.trigger("attach", engine);
+        }
       });
       this.listenTo(this.engine, "tap", this.onTap);
       this.listenTo(this.engine, "key", this.onKey);
@@ -495,7 +498,8 @@
         );
       }
 
-      var secondPass = [];
+      // var secondPass = [];
+      let zMap = [];
       for (var col = tileX1; col <= tileX2; col++)
         for (var row = tileY1; row <= tileY2; row++) {
           index = col * this.attributes.height + row;
@@ -506,13 +510,20 @@
                 sprite.draw.call(sprite, context, this.spriteOptions);
                 count++;
               }  else {
-                secondPass.push(sprite);
+                if (!zMap[sprite.attributes.zIndex])
+                  zMap[sprite.attributes.zIndex] = []
+                // secondPass.push(sprite);
+                zMap[sprite.attributes.zIndex].push(sprite)
               }
             }
         }
-      for (var s = 0; s < secondPass.length; s++) {
-        sprite = secondPass[s];
-        sprite.draw.call(sprite, context, this.spriteOptions);
+      for (var z = 0; z < zMap.length; z++) {
+        if (!zMap[z]) continue;
+        for (var s = 0; s < zMap[z].length; s++) {
+          // sprite = secondPass[s];
+          let sprite = zMap[z][s];
+          sprite.draw.call(sprite, context, this.spriteOptions);
+        }
       }
 
       if (this.debugPanel) this.debugPanel.set({
@@ -548,7 +559,8 @@
         this.attributes.viewportLeft, this.attributes.viewportTop, this.viewport.width, this.viewport.height,
         this.attributes.viewportLeft, this.attributes.viewportTop, this.viewport.width, this.viewport.height);
 
-      var secondPass = [];
+      // var secondPass = [];
+      let zMap = [];
       for (var col = tileX1; col <= tileX2; col++)
         for (var row = tileY1; row <= tileY2; row++) {
           index = col * this.attributes.height + row;
@@ -560,16 +572,22 @@
                   sprite.draw.call(sprite, context, this.spriteOptions);
                   count++;
                 }  else {
-                  secondPass.push(sprite);
+                  if (!zMap[sprite.attributes.zIndex])
+                    zMap[sprite.attributes.zIndex] = []
+                  // secondPass.push(sprite);
+                  zMap[sprite.attributes.zIndex].push(sprite)
                 }
               }
             }
         }
-      for (var s = 0; s < secondPass.length; s++) {
-        sprite = secondPass[s];
-        if (sprite._draw)
-          sprite.draw.call(sprite, context, this.spriteOptions);
-      }
+        for (var z = 0; z < zMap.length; z++) {
+          if (!zMap[z]) continue;
+          for (var s = 0; s < zMap[z].length; s++) {
+            // sprite = secondPass[s];
+            let sprite = zMap[z][s];
+            sprite.draw.call(sprite, context, this.spriteOptions);
+          }
+        }
 
       if (clip) context.restore();
 
@@ -577,7 +595,7 @@
         dynamicDrawn: count,
         dynamicDrawTime: _.now()-start
       });
-      
+
       return this;
     },
 
@@ -733,9 +751,9 @@
             models[i].id = this.buildId(models[i]);
         }
       else {
-        if (models.attributes)
+        if (models.attributes) {
           models.set("id", this.buildId(models));
-        else
+        } else
           models.id = this.buildId(models);
       }
 
@@ -786,7 +804,7 @@
         this.sprites.remove(existing);
         return null;
       }
-      
+
       if (existing) {
         if (spriteName == existingName) {
           if (!existing.getStateInfo) {
@@ -835,6 +853,7 @@
 
       return newSprite;
     },
+    // TODO this is not incrementing ids properly
     buildIdFromName: function(name) {
       var re = new RegExp("^" + name + "\\." + "\\d+$"),
           numbers = this.dynamicSprites.reduce(function(numbers, sprite) {
@@ -843,6 +862,12 @@
             return numbers;
           }, [0]);
       return name + "." + (_.max(numbers) + 1);
+    },
+    buildIdFromClassCounter: function(sprite) {
+      let name = sprite.get('name');
+      if (!sprite.prototype.counter) sprite.prototype.counter = 0;
+      else sprite.prototype.counter += 1;
+      return name + '.' + sprite.prototype.counter;
     },
     buildId: function(sprite) {
       var attributes = sprite.attributes || sprite;

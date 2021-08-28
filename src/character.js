@@ -87,12 +87,19 @@
         yVelocity: fallVelocity,
         yAcceleration: fallAcceleration
       };
-  animations["idle-hurt-left"] = _.extend({}, animations["idle-left"], hurtAnimation);
-  animations["idle-hurt-right"] = _.extend({}, animations["idle-right"], hurtAnimation);
-  animations["walk-hurt-left"] = _.extend({}, animations["walk-left"], hurtAnimation);
-  animations["walk-hurt-right"] = _.extend({}, animations["walk-right"], hurtAnimation);
-  animations["fall-hurt-left"] = _.extend({}, animations["fall-left"], hurtAnimation);
-  animations["fall-hurt-right"] = _.extend({}, animations["fall-right"], hurtAnimation);
+  
+  animations["idle-hurt-left"] = _.extend({},
+    animations["idle-left"], hurtAnimation);
+  animations["idle-hurt-right"] = _.extend({},
+    animations["idle-right"], hurtAnimation);
+  animations["walk-hurt-left"] = _.extend({},
+    animations["walk-left"], hurtAnimation);
+  animations["walk-hurt-right"] = _.extend({},
+    animations["walk-right"], hurtAnimation);
+  animations["fall-hurt-left"] = _.extend({},
+    animations["fall-left"], hurtAnimation);
+  animations["fall-hurt-right"] = _.extend({},
+    animations["fall-right"], hurtAnimation);
 
 
   Backbone.Character = Backbone.Sprite.extend({
@@ -141,12 +148,12 @@
       var cur = this.getStateInfo(),
           dir = options.dir || cur.dir,
           opo = dir == "left" ? "right" : "left";
-      
+
       if (health == 0)
         return this.knockout(options.sprite || null, dir, options.dir2 || null);
-      else if (health < this.previous("health")) 
+      else if (health < this.previous("health"))
         return this.hurt(options.sprite || null, dir, options.dir2 || null);
-      
+
       this.lastAIEvent = _.now();
 
       return this;
@@ -180,7 +187,7 @@
       this._handlingSpriteHit = sprite;
 
       var cur = this.getStateInfo();
-      
+
       if (cur.mov2 == "hurt") return this;
 
       if (dir2 == "attack") {
@@ -378,7 +385,7 @@
         attrs.sequenceIndex = this.get("sequenceIndex");
 
       } else {
-        
+
         // Walls and other obstacles
         if (velocity <= 0 && collision) {
           // Turn around if obstacle left

@@ -235,7 +235,7 @@
       // Handle keyboard input
       $(document).on("keydown.Input", this.onKeydown.bind(this));
       $(document).on("keyup.Input", this.onKeyup.bind(this));
-      
+
       if (this.hasTouchpad()) {
         if (this.get("touchEnabled")) {
           if (window.navigator.msMaxTouchPoints) {
